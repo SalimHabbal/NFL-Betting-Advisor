@@ -1,0 +1,29 @@
+{
+  "stake": 50,
+  "legs": [
+    {
+      "id": "LEG1",
+      "description": "Josh Allen over 1.5 passing touchdowns",
+      "odds": -115,
+      "market": "player_pass_tds",
+      "team": "BUF",
+      "baseline_probability": 0.58,
+      "metadata": {
+        "player_name": "Josh Allen",
+        "opponent_team": "NYJ"
+      }
+    },
+    {
+      "id": "LEG2",
+      "description": "Garrett Wilson over 5.5 receptions",
+      "odds": 110,
+      "market": "player_receptions",
+      "team": "NYJ",
+      "baseline_probability": 0.47,
+      "metadata": {
+        "player_name": "Garrett Wilson",
+        "opponent_team": "BUF"
+      }
+    }
+  ]
+}
