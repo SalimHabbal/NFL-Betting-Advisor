@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import datetime as dt
 import logging
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from ..config import APISettings
 from ..http_client import http_get
@@ -18,7 +18,7 @@ class SportsDataClient:
         # Stores API credentials and configuration for SportsDataIO requests
         self.settings = settings
 
-    def _request(self, endpoint: str, params: Optional[Dict[str, str]] = None) -> Dict:
+    def _request(self, endpoint: str, params: Optional[Dict[str, str]] = None) -> Any:
         # Issues an authenticated GET request to the SportsDataIO endpoint
         url = f"{self.BASE_URL}/{endpoint}"
         headers = {"Ocp-Apim-Subscription-Key": self.settings.sportsdata_api_key}
