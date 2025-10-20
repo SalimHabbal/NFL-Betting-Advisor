@@ -16,22 +16,27 @@ class InjuryAdjuster:
     """Adjusts bet probabilities based on injury reports."""
 
     def __init__(self, injuries: List[Dict]):
+        # Caches the raw injury feed for later filtering
         self.injuries = injuries
 
     def _is_key_defender(self, injury: Dict) -> bool:
+        # Identifies defensive players whose absence boosts offensive bets
         return injury.get("Position") in KEY_DEFENSIVE_POSITIONS
 
     def _is_offensive_star(self, injury: Dict) -> bool:
+        # Flags offensive skill players whose injuries hurt their own team's props
         return injury.get("Position") in OFFENSIVE_SKILL_POSITIONS
 
     def adjust_leg(self, leg: BetLeg, opponent_team: Optional[str] = None) -> Optional[float]:
         """Return the adjustment multiplier for a bet leg."""
+        # Skips legs without a baseline probability to avoid compounding None
         if leg.baseline_probability is None:
             LOGGER.debug("Skipping injury adjustment for leg %s: no baseline probability", leg.leg_id)
             return None
 
         multiplier = 1.0
         adjustments: List[str] = []
+        # Scans each injury entry and accumulates multipliers as signals
         for injury in self.injuries:
             team = injury.get("Team")
             if opponent_team and team != opponent_team:
@@ -49,6 +54,7 @@ class InjuryAdjuster:
                     )
         multiplier = max(0.05, multiplier)
         if abs(multiplier - 1.0) > 1e-6:
+            # Stores the adjustment notes for downstream rationale reporting
             leg.notes.extend(adjustments)
             adjusted = leg.baseline_probability * multiplier
             leg.notes.append(f"Injury multiplier applied: {multiplier:.2f}")

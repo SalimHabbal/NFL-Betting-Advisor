@@ -8,6 +8,7 @@ from typing import Optional
 
 
 def _load_env_file(path: str = ".env") -> None:
+    # Loads environment variables from a .env file when present
     env_path = Path(path)
     if not env_path.exists():
         return
@@ -33,6 +34,7 @@ class APISettings:
 
     @classmethod
     def from_env(cls) -> "APISettings":
+        # Reads API credentials and configuration values from the environment
         odds_key = os.getenv("ODDS_API_KEY", "9c85626ecf9eefc72a33034a22ff7ece")
         sportsdata_key = os.getenv("SPORTSDATA_API_KEY", "c1cb95854588435c9387a968dbdf1d34")
         if not odds_key:

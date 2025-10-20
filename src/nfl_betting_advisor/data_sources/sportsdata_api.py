@@ -15,34 +15,42 @@ class SportsDataClient:
     BASE_URL = "https://api.sportsdata.io/v3/nfl"
 
     def __init__(self, settings: APISettings):
+        # Stores API credentials and configuration for SportsDataIO requests
         self.settings = settings
 
     def _request(self, endpoint: str, params: Optional[Dict[str, str]] = None) -> Dict:
+        # Issues an authenticated GET request to the SportsDataIO endpoint
         url = f"{self.BASE_URL}/{endpoint}"
         headers = {"Ocp-Apim-Subscription-Key": self.settings.sportsdata_api_key}
         LOGGER.debug("Requesting %s with %s", url, params)
         return http_get(url, params=params, headers=headers)
 
     def get_injuries(self, season: Optional[int] = None) -> List[Dict]:
+        # Pulls injury data for the specified season or current year
         season = season or self.settings.sportsdata_season or dt.datetime.now().year
         return self._request(f"scores/json/Injuries/{season}")
 
     def get_players(self) -> List[Dict]:
+        # Retrieves the full player directory from SportsDataIO
         return self._request("scores/json/Players")
 
     def get_team_game_stats(self, season: Optional[int] = None) -> List[Dict]:
+        # Fetches per-game team statistics for a season
         season = season or self.settings.sportsdata_season or dt.datetime.now().year
         return self._request(f"stats/json/TeamGameStats/{season}")
 
     def get_team_season_stats(self, season: Optional[int] = None) -> List[Dict]:
+        # Fetches season-level team statistics aggregates
         season = season or self.settings.sportsdata_season or dt.datetime.now().year
         return self._request(f"stats/json/TeamSeasonStats/{season}")
 
     def get_team_records(self, season: Optional[int] = None) -> List[Dict]:
+        # Retrieves team standings for a given season
         season = season or self.settings.sportsdata_season or dt.datetime.now().year
         return self._request(f"scores/json/Standings/{season}")
 
     def get_head_to_head_record(self, team_a: str, team_b: str, lookback_years: int = 5) -> Dict[str, int]:
+        # Aggregates head-to-head wins between two teams over a rolling window
         current_year = self.settings.sportsdata_season or dt.datetime.now().year
         wins_a = wins_b = 0
         for season in range(current_year - lookback_years, current_year + 1):

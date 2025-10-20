@@ -15,11 +15,13 @@ LOGGER = logging.getLogger(__name__)
 
 
 def _configure_logging(verbose: bool) -> None:
+    # Sets the logging level based on the verbose flag
     level = logging.DEBUG if verbose else logging.INFO
     logging.basicConfig(level=level, format="%(levelname)s: %(message)s")
 
 
 def parse_args() -> argparse.Namespace:
+    # Builds the argument parser for the CLI entrypoint
     parser = argparse.ArgumentParser(description="NFL parlay value advisor")
     parser.add_argument(
         "--parlay",
@@ -46,6 +48,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def load_parlay(path: Path, stake_override: float | None = None) -> Parlay:
+    # Loads the parlay JSON and optionally overrides the stake value
     data: Dict[str, Any] = json.loads(path.read_text())
     parlay = build_parlay_from_dict(data)
     if stake_override is not None:
@@ -54,6 +57,7 @@ def load_parlay(path: Path, stake_override: float | None = None) -> Parlay:
 
 
 def display_results(result, parlay: Parlay) -> None:
+    # Prints a formatted summary of the evaluation results
     print("=" * 60)
     print("Parlay Evaluation")
     print("=" * 60)
@@ -80,6 +84,7 @@ def display_results(result, parlay: Parlay) -> None:
 
 
 def main() -> None:
+    # Orchestrates argument parsing, evaluation, and result display
     args = parse_args()
     _configure_logging(args.verbose)
     settings = APISettings.from_env()

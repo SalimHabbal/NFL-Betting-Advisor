@@ -9,6 +9,7 @@ from typing import List, Optional, Dict
 class Player:
     """Represents an NFL player relevant to a bet."""
 
+    # Stores core identity and injury metadata for a player
     player_id: str
     name: str
     team: str
@@ -21,6 +22,7 @@ class Player:
 class BetLeg:
     """A single bet leg within a parlay."""
 
+    # Captures identifying fields and market context for the leg
     leg_id: str
     description: str
     odds_american: int
@@ -34,6 +36,7 @@ class BetLeg:
 
     def implied_probability(self) -> float:
         """Return the implied probability from the American odds."""
+        # Converts American odds into a probability representation
         odds = self.odds_american
         if odds == 0:
             raise ValueError("American odds cannot be 0")
@@ -51,6 +54,7 @@ class Parlay:
 
     def combined_probability(self) -> Optional[float]:
         """Return the combined probability if all legs have adjusted probabilities."""
+        # Multiplies adjusted probabilities, aborting if any leg lacks an adjustment
         probability = 1.0
         for leg in self.legs:
             if leg.adjusted_probability is None:
@@ -59,6 +63,7 @@ class Parlay:
         return probability
 
     def combined_decimal_odds(self) -> float:
+        # Converts each leg to decimal odds and multiplies them into a parlay price
         decimal_odds = 1.0
         for leg in self.legs:
             implied = leg.implied_probability()
@@ -68,6 +73,7 @@ class Parlay:
         return decimal_odds
 
     def potential_payout(self) -> float:
+        # Calculates the total return excluding the original stake
         return self.stake * (self.combined_decimal_odds() - 1)
 
 

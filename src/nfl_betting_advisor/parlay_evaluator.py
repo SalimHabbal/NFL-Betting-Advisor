@@ -20,6 +20,7 @@ class ParlayEvaluator:
     """Coordinates data fetching, adjustments, and AI scoring."""
 
     def __init__(self, settings: Optional[APISettings] = None, use_live_data: bool = True):
+        # Initializes data clients and advisor with optional live data toggle
         self.settings = settings or APISettings.from_env()
         self.use_live_data = use_live_data
         self.odds_client = OddsAPIClient(self.settings)
@@ -29,6 +30,7 @@ class ParlayEvaluator:
         self._injury_adjuster: Optional[InjuryAdjuster] = None
 
     def _load_players(self) -> None:
+        # Fetches and caches player metadata for player-name resolution
         if self._player_directory or not self.use_live_data:
             return
         try:
@@ -51,6 +53,7 @@ class ParlayEvaluator:
             )
 
     def _load_injuries(self) -> None:
+        # Pulls the current injury report and prepares the adjuster
         if self._injury_adjuster or not self.use_live_data:
             return
         try:
@@ -61,6 +64,7 @@ class ParlayEvaluator:
         self._injury_adjuster = InjuryAdjuster(injuries)
 
     def _attach_players(self, legs: Iterable[BetLeg]) -> None:
+        # Maps metadata player names onto BetLeg objects
         self._load_players()
         for leg in legs:
             player_name = leg.metadata.get("player_name") if leg.metadata else None
@@ -80,14 +84,17 @@ class ParlayEvaluator:
             return {team_a: 0, team_b: 0}
 
     def _apply_adjustments(self, parlay: Parlay) -> None:
+        # Runs all enrichment steps on the incoming parlay legs
         self._attach_players(parlay.legs)
         self._load_injuries()
         for leg in parlay.legs:
+            # Establishes baseline probabilities using implied odds if absent
             if leg.baseline_probability is None:
                 leg.baseline_probability = leg.implied_probability()
             opponent_team = leg.metadata.get("opponent_team") if leg.metadata else None
             target_team = leg.team or (leg.player.team if leg.player else None)
             if self._injury_adjuster and opponent_team:
+                # Applies injury adjustments when relevant data is available
                 adjusted = self._injury_adjuster.adjust_leg(leg, opponent_team=opponent_team)
                 if adjusted is not None:
                     leg.adjusted_probability = adjusted
@@ -95,6 +102,7 @@ class ParlayEvaluator:
             if leg.adjusted_probability is None:
                 leg.adjusted_probability = leg.baseline_probability
             if target_team and opponent_team and self.use_live_data:
+                # Applies historical matchup adjustments between the two teams
                 record = self._get_head_to_head(target_team, opponent_team)
                 historical = HistoricalAnalyzer(record)
                 adjusted = historical.adjust_leg(leg, target_team)
@@ -102,6 +110,7 @@ class ParlayEvaluator:
                     leg.adjusted_probability = adjusted
                     leg.baseline_probability = leg.adjusted_probability
             if self.use_live_data and leg.metadata.get("player_name"):
+                # Annotates the leg with current market pricing information
                 self._annotate_market_price(leg)
 
     def _annotate_market_price(self, leg: BetLeg) -> None:
@@ -127,11 +136,13 @@ class ParlayEvaluator:
         )
 
     def evaluate(self, parlay: Parlay) -> EvaluationResult:
+        # Applies all adjustments and runs the heuristic advisor
         self._apply_adjustments(parlay)
         return self.advisor.evaluate(parlay)
 
 
 def build_parlay_from_dict(data: Dict) -> Parlay:
+    # Converts a dictionary payload into Parlay and BetLeg objects
     legs = []
     for entry in data["legs"]:
         leg = BetLeg(

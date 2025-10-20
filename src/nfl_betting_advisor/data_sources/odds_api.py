@@ -14,9 +14,11 @@ class OddsAPIClient:
     BASE_URL = "https://api.the-odds-api.com/v4"
 
     def __init__(self, settings: APISettings):
+        # Stores configuration and API credentials for outbound calls
         self.settings = settings
 
     def _request(self, endpoint: str, params: Optional[Dict[str, str]] = None) -> Dict:
+        # Builds the request payload and delegates to the shared HTTP helper
         url = f"{self.BASE_URL}/{endpoint}"
         query = {
             "apiKey": self.settings.odds_api_key,
@@ -32,9 +34,11 @@ class OddsAPIClient:
         return data
 
     def get_events(self) -> List[Dict]:
+        # Fetches the list of events for the configured sport
         return self._request("sports/{sport}/events".format(sport=self.settings.odds_sport_key))
 
     def get_player_props(self, event_id: Optional[str] = None) -> List[Dict]:
+        # Retrieves player prop markets, optionally filtered by event
         endpoint = "odds"
         params: Dict[str, str] = {}
         if event_id:
@@ -42,6 +46,7 @@ class OddsAPIClient:
         return self._request(endpoint, params=params)
 
     def get_best_player_prop_odds(self, player_name: str, market: Optional[str] = None) -> Optional[Dict]:
+        # Iterates through outcomes to find the best available price for a player prop
         markets_data = self.get_player_props()
         best_offer: Optional[Dict] = None
         for event in markets_data:

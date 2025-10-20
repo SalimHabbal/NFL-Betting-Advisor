@@ -15,6 +15,7 @@ class HeuristicAIAdvisor:
     """A lightweight rules-based advisor that simulates AI judgement."""
 
     def __init__(self) -> None:
+        # Defines weighting for each signal contributing to the final value score
         self.weights = {
             "ev_weight": 0.5,
             "injury_weight": 0.2,
@@ -23,13 +24,16 @@ class HeuristicAIAdvisor:
         }
 
     def _score_leg(self, leg: BetLeg) -> Dict[str, float]:
+        # Derives implied, baseline, and adjusted probabilities for this leg
         implied_prob = leg.implied_probability()
         baseline = leg.baseline_probability or implied_prob
         adjusted = leg.adjusted_probability or baseline
+        # Calculates how much the adjustment changes the value of the leg
         ev_contribution = (adjusted - implied_prob) / implied_prob if implied_prob else 0
         injury_signal = 0.0
         history_signal = 0.0
         market_signal = 0.0
+        # Parses notes to gather qualitative signals for each leg
         for note in leg.notes:
             lowered = note.lower()
             if "injury multiplier" in lowered or "missing" in lowered:
@@ -48,6 +52,7 @@ class HeuristicAIAdvisor:
         }
 
     def evaluate(self, parlay: Parlay) -> EvaluationResult:
+        # Collects per-leg scoring context and calculates parlay-wide stats
         leg_scores: Dict[str, Dict[str, float]] = {}
         combined_probability = parlay.combined_probability()
         combined_decimal_odds = parlay.combined_decimal_odds()
@@ -58,6 +63,7 @@ class HeuristicAIAdvisor:
         )
         value_scores: List[float] = []
         rationale: List[str] = []
+        # Scores each leg and builds the narrative rationale
         for leg in parlay.legs:
             scores = self._score_leg(leg)
             leg_scores[leg.leg_id] = scores
@@ -80,6 +86,7 @@ class HeuristicAIAdvisor:
         if combined_probability is not None:
             rationale.append(f"Parlay hit probability: {combined_probability:.2%}")
 
+        # Converts the aggregated score into a human-readable verdict
         if overall_score > 0.15 and (expected_val or 0) > 0:
             verdict = "Strong Value"
         elif overall_score > 0.05:
