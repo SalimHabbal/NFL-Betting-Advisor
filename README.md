@@ -57,6 +57,32 @@ nfl-betting-advisor --parlay samples/parlay_example.json --verbose
 
 Add `--disable-live-data` to operate entirely on the data supplied in the JSON file (no API calls).
 
+## Usage Guide
+
+1. **Prepare environment variables**
+   - Copy `.env.example` to `.env` (`cp .env.example .env`).
+   - Replace the demo API keys with your personal keys. These are loaded automatically when you run the CLI.
+   - Optional: set `SPORTSDATA_SEASON`, `ODDS_API_REGION`, `ODDS_API_MARKET`, or `ODDS_API_SPORT_KEY` to tune the data sources without touching code.
+
+2. **Craft or import a parlay**
+   - Start from `samples/parlay_example.json` and adjust each leg’s `description`, `odds`, and optional `baseline_probability`.
+   - Include `metadata.player_name` and `metadata.opponent_team` when you want the evaluator to factor in injury reports and opponent history.
+   - Add a `stake` field to represent how much you plan to wager; override it at runtime with `--stake` if needed.
+
+3. **Run the CLI**
+   ```bash
+   nfl-betting-advisor --parlay path/to/parlay.json
+   ```
+   - Use `--stake 25` to temporarily change the wager amount outlined in the JSON file.
+   - Append `--disable-live-data` if you are offline, rate-limited, or experimenting with hypothetical adjustments.
+   - Add `--verbose` to surface detailed logging about every adjustment and API call.
+
+4. **Interpret the results**
+   - The leg table shows the implied probability from the odds alongside the adjusted probability after accounting for context.
+   - `Value Score` reflects how favorable the overall parlay appears; higher positive scores indicate stronger value.
+   - `Expected Value` (when available) converts the evaluation into a dollar figure based on the stake.
+   - Review the `Rationale` bullets to see which injuries, historical trends, or heuristics influenced the verdict.
+
 ## Output
 
 The CLI prints a rich table showing the implied vs. adjusted probabilities for each leg, the combined expected value, and an overall verdict (e.g., *Strong Value*, *Moderate Value*, *Neutral*, *High Risk*). Detailed rationale lines highlight which injuries or historical records influenced the evaluation.
