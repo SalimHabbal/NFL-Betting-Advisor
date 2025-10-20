@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from ..config import APISettings
 from ..http_client import http_get
@@ -17,7 +17,7 @@ class OddsAPIClient:
         # Stores configuration and API credentials for outbound calls
         self.settings = settings
 
-    def _request(self, endpoint: str, params: Optional[Dict[str, str]] = None) -> Dict:
+    def _request(self, endpoint: str, params: Optional[Dict[str, str]] = None) -> Any:
         # Builds the request payload and delegates to the shared HTTP helper
         url = f"{self.BASE_URL}/{endpoint}"
         query = {
