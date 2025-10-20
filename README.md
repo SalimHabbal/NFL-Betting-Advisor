@@ -83,6 +83,64 @@ Add `--disable-live-data` to operate entirely on the data supplied in the JSON f
    - `Expected Value` (when available) converts the evaluation into a dollar figure based on the stake.
    - Review the `Rationale` bullets to see which injuries, historical trends, or heuristics influenced the verdict.
 
+## Parlay Schema Reference
+
+### Market values
+
+Use any of the following `market` keys when defining a leg. They align with the The Odds API player prop markets:
+
+- `player_pass_tds`
+- `player_pass_yds`
+- `player_pass_completions`
+- `player_pass_attempts`
+- `player_interceptions`
+- `player_rush_attempts`
+- `player_rush_yds`
+- `player_rush_tds`
+- `player_receptions`
+- `player_reception_yds`
+- `player_reception_tds`
+- `player_longest_reception`
+- `player_longest_rush`
+- `player_kicking_points`
+- `player_field_goals`
+- `player_field_goals_made`
+- `player_extra_points`
+- `player_tackles_assists`
+- `player_sacks`
+
+### Description guidelines
+
+Stick to a consistent pattern so humans and tooling can parse the `description`:
+
+- Begin with the player or team name (`Josh Allen`, `San Francisco 49ers`).
+- Follow with the direction of the bet (`over`, `under`, `moneyline`, `spread`).
+- Close with the stat and threshold (`1.5 passing touchdowns`, `-3.5`, `win outright`).
+- Example: `Josh Allen over 1.5 passing touchdowns`.
+
+### Team codes
+
+`team` should use official NFL abbreviations:
+
+| Code | Team | Code | Team |
+| ---- | ---- | ---- | ---- |
+| ARI | Arizona Cardinals | ATL | Atlanta Falcons |
+| BAL | Baltimore Ravens | BUF | Buffalo Bills |
+| CAR | Carolina Panthers | CHI | Chicago Bears |
+| CIN | Cincinnati Bengals | CLE | Cleveland Browns |
+| DAL | Dallas Cowboys | DEN | Denver Broncos |
+| DET | Detroit Lions | GB | Green Bay Packers |
+| HOU | Houston Texans | IND | Indianapolis Colts |
+| JAX | Jacksonville Jaguars | KC | Kansas City Chiefs |
+| LAC | Los Angeles Chargers | LAR | Los Angeles Rams |
+| LV | Las Vegas Raiders | MIA | Miami Dolphins |
+| MIN | Minnesota Vikings | NE | New England Patriots |
+| NO | New Orleans Saints | NYG | New York Giants |
+| NYJ | New York Jets | PHI | Philadelphia Eagles |
+| PIT | Pittsburgh Steelers | SF | San Francisco 49ers |
+| SEA | Seattle Seahawks | TB | Tampa Bay Buccaneers |
+| TEN | Tennessee Titans | WAS | Washington Commanders |
+
 ## Output
 
 The CLI prints a rich table showing the implied vs. adjusted probabilities for each leg, the combined expected value, and an overall verdict (e.g., *Strong Value*, *Moderate Value*, *Neutral*, *High Risk*). Detailed rationale lines highlight which injuries or historical records influenced the evaluation.
