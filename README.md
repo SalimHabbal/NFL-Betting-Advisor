@@ -52,16 +52,56 @@ nfl-betting-advisor --parlay samples/parlay_example.json
 
 ### Example Output
 
-The tool produces a rich table showing the "Implied Probability" (from the odds) vs the "Adjusted Probability" (from the model), followed by an AI-generated analysis.
+**Input (`parlay.json`):**
+```json
+{
+  "legs": [
+    {
+      "id": "LEG1",
+      "description": "Josh Allen over 1.5 passing touchdowns",
+      "odds": -115,
+      "team": "BUF",
+      "metadata": { "player_name": "Josh Allen", "opponent_team": "MIA" }
+    }
+  ],
+  "stake": 50
+}
+```
 
+**Command:**
+```bash
+nfl-betting-advisor --parlay parlay.json
+```
+
+**Terminal Output:**
 ```text
-Verdict: Strong Value
-Value Score: 0.18
-Expected Value: $12.50
+────────── NFL Parlay Advisor ──────────
 
-AI Analysis:
-"This is a strong play. Josh Allen has historically dominated the Dolphins defense (Adjusted: +5%), 
-and the injury to Miami's starting safety significantly boosts his deep ball potential..."
+              Leg Analysis              
+╭──────┬───────┬───────┬───────┬───────╮
+│ ID   │ Desc… │ Impl… │ Adju… │ Delta │
+├──────┼───────┼───────┼───────┼───────┤
+│ LEG1 │ Josh… │ 53.5% │ 58.0% │ +4.5% │
+╰──────┴───────┴───────┴───────┴───────╯
+
+╭──────── Summary ────────╮
+│ Verdict: Strong Value   │
+│ Value Score: 0.18       │
+│ Expected Value: $12.50  │
+╰─────────────────────────╯
+
+───────────── AI Analysis ──────────────
+
+╭──────────────────────────────────────╮
+│                                      │
+│  This is a strong play. Josh Allen   │
+│  has historically dominated the      │
+│  Dolphins defense (Adjusted: +5%),   │
+│  and the injury to Miami's starting  │
+│  safety significantly boosts his     │
+│  deep ball potential...              │
+│                                      │
+╰──────────────────────────────────────╯
 ```
 
 ## Parlay Schema Reference
