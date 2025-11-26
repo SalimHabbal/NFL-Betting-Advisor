@@ -10,6 +10,8 @@ from typing import Any, Dict
 from .config import APISettings
 from .models import Parlay
 from .parlay_evaluator import ParlayEvaluator, build_parlay_from_dict
+from .analysis.llm_advisor import GeminiAdvisor
+from .ui import RichPresenter
 
 LOGGER = logging.getLogger(__name__)
 
@@ -44,6 +46,12 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Enable verbose logging",
     )
+    parser.add_argument(
+        "--ai-model",
+        choices=["heuristic", "hybrid"],
+        default="hybrid",
+        help="Choose the AI model: 'heuristic' (rules-only) or 'hybrid' (Gemini LLM)",
+    )
     return parser.parse_args()
 
 
@@ -56,43 +64,29 @@ def load_parlay(path: Path, stake_override: float | None = None) -> Parlay:
     return parlay
 
 
-def display_results(result, parlay: Parlay) -> None:
-    # Prints a formatted summary of the evaluation results
-    print("=" * 60)
-    print("Parlay Evaluation")
-    print("=" * 60)
-    header = f"{'Leg ID':<8} {'Description':<45} {'Imp Prob':>10} {'Adj Prob':>10}"
-    print(header)
-    print("-" * len(header))
-    for leg in parlay.legs:
-        breakdown = result.leg_breakdown.get(leg.leg_id, {})
-        implied = breakdown.get("implied_prob", 0)
-        adjusted = breakdown.get("adjusted_prob", leg.adjusted_probability or 0)
-        desc = (leg.description[:42] + "...") if len(leg.description) > 45 else leg.description
-        print(f"{leg.leg_id:<8} {desc:<45} {implied:>9.2%} {adjusted:>10.2%}")
-    print()
-    print(f"Overall Verdict: {result.verdict}")
-    print(f"Value Score: {result.overall_value_score:.2f}")
-    if result.expected_value is not None:
-        print(f"Expected Value: ${result.expected_value:.2f}")
-    if result.combined_probability is not None:
-        print(f"Combined Hit Probability: {result.combined_probability:.2%}")
-    if result.rationale:
-        print("\nRationale:")
-        for note in result.rationale:
-            print(f" - {note}")
-
-
 def main() -> None:
     # Orchestrates argument parsing, evaluation, and result display
     args = parse_args()
     _configure_logging(args.verbose)
+    
     settings = APISettings.from_env()
+    
+    # Initialize Evaluator
     evaluator = ParlayEvaluator(settings=settings, use_live_data=not args.disable_live_data)
+    
+    # Swap out the advisor if Hybrid mode is selected
+    if args.ai_model == "hybrid":
+        LOGGER.info("Initializing Hybrid AI (Gemini)...")
+        evaluator.advisor = GeminiAdvisor()
+    
     parlay = load_parlay(args.parlay, args.stake)
     LOGGER.info("Loaded parlay with %d legs and stake %.2f", len(parlay.legs), parlay.stake)
+    
     result = evaluator.evaluate(parlay)
-    display_results(result, parlay)
+    
+    # Use Rich UI
+    presenter = RichPresenter()
+    presenter.display_parlay_evaluation(parlay, result)
 
 
 if __name__ == "__main__":
